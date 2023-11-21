@@ -25,7 +25,7 @@ public class Game {
             public void run() {
                 
                 IPlayer player1 = new HumanPlayer("Human");
-                IPlayer player2 = new MyPlayer("a");
+                IPlayer player2 = new MyPlayer("b");
                 //IPlayer player1 = new RandomPlayer("Kamikaze 1");
                 //IPlayer player2 = new RandomPlayer("Kamikaze 2");
                                 
