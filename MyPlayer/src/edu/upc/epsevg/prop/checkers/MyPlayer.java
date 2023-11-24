@@ -56,7 +56,32 @@ public class MyPlayer implements IPlayer, IAuto {
         }
         return new PlayerMove( points, 0L, 0, SearchType.RANDOM);         
         
+        /*
+        
+        int millorMove = minMax(s);
+        System.out.println("Estats explorats: " + nodesExplorats);
+        return millorMove;
+        
+        */
+        
+        /*
+         List<MoveNode> moves =  s.getMoves();
+
+        Random rand = new Random();
+        int q = rand.nextInt(moves.size());
+        List<Point> points = new ArrayList<>();
+        MoveNode node = moves.get(q);
+        points.add(node.getPoint());
+        
+        while(!node.getChildren().isEmpty()) {
+            int c = rand.nextInt(node.getChildren().size());
+            node = node.getChildren().get(c);
+            points.add(node.getPoint());
+        }
+        */
+        */
     }
+    
 
     /**
      * Ens avisa que hem de parar la cerca en curs perquè s'ha exhaurit el temps
@@ -65,6 +90,37 @@ public class MyPlayer implements IPlayer, IAuto {
     @Override
     public String getName() {
         return "Random(" + name + ")";
+    }
+
+    
+    /**
+     * Implementa l'algorisme MiniMax per trobar el millor moviment en el tauler
+     * actual.
+     *
+     * @param t El tauler actual del joc.
+     * @return La columna on es realitzarà el millor moviment.
+     */
+    private int minMax(GameStatus s) {
+        int costActual = -20000;
+        List<MoveNode> moves =  s.getMoves();
+        List<Point> points = new ArrayList<>();
+        int alpha = Integer.MIN_VALUE, beta = Integer.MAX_VALUE;
+        for (int i = 0; i <  moves.size(); i++) {
+            MoveNode node = moves.get(i);
+            List<Point> actualpoints = new ArrayList<>();
+            GameStatus aux = new Gamestatus(s);
+            //Tauler aux = new Tauler(t);
+            if (aux.movpossible(columna)) {
+                aux.afegeix(columna, jugadorMaxim);
+                int valorHeuristic = minValor(aux,points, alpha, beta);
+                if (valorHeuristic > costActual) {
+                   costActual = valorHeuristic;
+                   points = actualpoints;
+                }
+                alpha = Math.max(alpha, costActual);
+            }
+        }
+        return points;
     }
 
 }
