@@ -21,6 +21,7 @@ public class MyPlayer implements IPlayer, IAuto {
 
     private String name;
     private GameStatus s;
+    private int profunditat=4;
 
     public MyPlayer(String name) {
         this.name = name;
@@ -100,29 +101,60 @@ public class MyPlayer implements IPlayer, IAuto {
      * @param t El tauler actual del joc.
      * @return La columna on es realitzarà el millor moviment.
      */
-    private int minMax(GameStatus s) {
+    private List<Point> minMax(GameStatus s) {
         int costActual = -20000;
         List<MoveNode> moves =  s.getMoves();
         List<Point> points = new ArrayList<>();
         int alpha = Integer.MIN_VALUE, beta = Integer.MAX_VALUE;
-        for (int i = 0; i <  moves.size(); i++) {
-            MoveNode node = moves.get(i);
-            List<Point> actualpoints = new ArrayList<>();
-            //GameStatus aux = new Gamestatus(s);
-            //Tauler aux = new Tauler(t);
-            actualpoints = recursive();
-            if (actualpoints points = actualpoints
-            /*if (aux.movpossible(columna)) {
-                aux.afegeix(columna, jugadorMaxim);
-                int valorHeuristic = minValor(aux,points, alpha, beta);
-                if (valorHeuristic > costActual) {
-                   costActual = valorHeuristic;
-                   points = actualpoints;
-                }
-                alpha = Math.max(alpha, costActual);
-            }*/
+        List<List<Point>> lol = calmov(moves);
+        for (int i = 0; i <  lol.size(); i++) {
+            GameStatus aux = new GameStatus(s);
+            List<Point> intent = lol.get(i);
+            aux.movePiece(intent);
+
+            int valorHeuristic = minValor(aux,profunditat-1, alpha, beta);
+            if (valorHeuristic > costActual) {
+                costActual = valorHeuristic;
+                points = intent;
+            }
+            alpha = Math.max(alpha, costActual);
         }
+        
         return points;
+    }
+    
+    private List<List<Point>> calmov( List<MoveNode> moves){
+        
+        List<List<Point>> lol = new List<List<Point>>();
+        
+        for(int i = 0; i < moves.size(); i++){
+            
+            MoveNode node = moves.get(i);
+            List<List<Point>> lol_aux = ds(node);
+            lol.addAll(lol_aux);
+
+        }
+        
+        return lol;
+       
+    }
+    
+    private List<List<Point>> ds( MoveNode node){
+        
+        List<List<Point>> lol = new List<List<Point>>();
+        
+        List<Point> lp = new List<Point>();
+        lp.add(node.getPoint());
+        if(!node.getChildren().isEmpty()) {
+            ds(node.getChildren().get(0));
+            if(node.getChildren().size() > 1) {
+                ds(node.getChildren().get(1));
+            }
+        }
+        else {
+            
+        }
+        
     }
     
     private int heuristica (Gamestatus s){
@@ -145,7 +177,7 @@ public class MyPlayer implements IPlayer, IAuto {
                     }
                     
                 }
-                if(s.getCurrentPlaer()== PLAYER2){
+                if(s.getCurrentPlayer()== PLAYER2){
                     
                 }
                 
@@ -155,5 +187,6 @@ public class MyPlayer implements IPlayer, IAuto {
         
         return h;
     }
+    
 
 }
