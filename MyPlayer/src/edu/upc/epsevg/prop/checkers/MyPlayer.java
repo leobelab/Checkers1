@@ -130,7 +130,8 @@ public class MyPlayer implements IPlayer, IAuto {
         for(int i = 0; i < moves.size(); i++){
             
             MoveNode node = moves.get(i);
-            List<List<Point>> lol_aux = ds(node);
+            List<Point> lp = new List<Point>();
+            List<List<Point>> lol_aux = ds(node, lp);
             lol.addAll(lol_aux);
 
         }
@@ -139,11 +140,11 @@ public class MyPlayer implements IPlayer, IAuto {
        
     }
     
-    private List<List<Point>> ds( MoveNode node){
+    private List<List<Point>> ds( MoveNode node, List<Point> lp){
         
-        List<List<Point>> lol = new List<List<Point>>();
+        //List<List<Point>> lol = new List<List<Point>>();
         
-        List<Point> lp = new List<Point>();
+        //List<Point> lp = new List<Point>();
         lp.add(node.getPoint());
         if(!node.getChildren().isEmpty()) {
             ds(node.getChildren().get(0));
@@ -152,9 +153,9 @@ public class MyPlayer implements IPlayer, IAuto {
             }
         }
         else {
-            
+            afegir lp a llista general
         }
-        
+        return llistageneral;
     }
     
     private int heuristica (Gamestatus s){
