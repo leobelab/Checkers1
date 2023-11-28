@@ -158,6 +158,114 @@ public class MyPlayer implements IPlayer, IAuto {
         return llistageneral;
     }
     
+    //funciones min max
+    
+        /**
+     * Calcula el valor màxim en un estat del joc utilitzant recursió.
+     *
+     * @param t El tauler actual del joc.
+     * @param colTirada La columna de la tirada actual.
+     * @param depth La profunditat restant per explorar.
+     * @param alpha Límit inferior actual per a la poda alfa-beta.
+     * @param beta Límit superior actual per a la poda alfa-beta.
+     * @return El valor màxim calculat per a l'estat actual.
+     */
+    /*private int maxValor(Tauler t, int colTirada, int depth, int alpha, int beta) {
+        int valorHeuristic = -10000;
+
+        // Verifica si la solució ja s'ha trobat per al jugador mínim.
+        if (t.solucio(colTirada, jugadorMinim)) {
+            return valorHeuristic;
+        }
+
+        // Verifica si s'ha arribat a la profunditat màxima o si no es poden fer més moviments.
+        if (depth == 0 || !t.espotmoure()) {
+            return heuristica(t);
+        }
+
+        boolean parar_busca = false;
+
+        // Itera a través de les columnes del tauler per a les possibles moviments.
+        for (int i = 0; i < t.getMida() && !parar_busca; i++) {
+            Tauler aux = new Tauler(t);
+
+            // Verifica si el moviment és possible.
+            if (aux.movpossible(i)) {
+                aux.afegeix(i, jugadorMaxim);
+                int fhMin = minValor(aux, i, depth - 1, alpha, beta);
+
+                // Actualitza el valor heurístic amb el valor màxim.
+                valorHeuristic = Math.max(valorHeuristic, fhMin);
+
+                // Realitza la poda alfa-beta si està habilitada.
+                if (poda) {
+                    alpha = Math.max(valorHeuristic, alpha);
+
+                    // Verifica si es pot parar la cerca actual amb la poda alfa-beta.
+                    if (alpha >= beta) {
+                        parar_busca = true;
+                    }
+                }
+            }
+        }
+
+        return valorHeuristic;
+    }
+    */
+    /**
+     * Calcula el valor mínim en un estat del joc utilitzant recursió.
+     *
+     * @param t El tauler actual del joc.
+     * @param colTirada La columna de la tirada actual.
+     * @param depth La profunditat restant per explorar.
+     * @param alpha Límit inferior actual per a la poda alfa-beta.
+     * @param beta Límit superior actual per a la poda alfa-beta.
+     * @return El valor mínim calculat per a l'estat actual.
+     */
+    /*private int minValor(Tauler t, int colTirada, int depth, int alpha, int beta) {
+        int millorMoviment = 10000;
+
+        // Verifica si la solució ja s'ha trobat per al jugador màxim.
+        if (t.solucio(colTirada, jugadorMaxim)) {
+            return millorMoviment;
+        }
+
+        // Verifica si s'ha arribat a la profunditat màxima o si no es poden fer més moviments.
+        if (depth == 0 || !t.espotmoure()) {
+            return heuristica(t);
+        }
+
+        boolean parar_busca = false;
+
+        // Itera a través de les columnes del tauler per a les possibles moviments.
+        for (int i = 0; i < t.getMida() && !parar_busca; i++) {
+            Tauler aux = new Tauler(t);
+
+            // Verifica si el moviment és possible.
+            if (aux.movpossible(i)) {
+                aux.afegeix(i, jugadorMinim);
+                int fhMax = maxValor(aux, i, depth - 1, alpha, beta);
+
+                // Actualitza el millor moviment amb el valor mínim.
+                millorMoviment = Math.min(millorMoviment, fhMax);
+
+                // Realitza la poda alfa-beta si està habilitada.
+                if (poda) {
+                    beta = Math.min(millorMoviment, beta);
+
+                    // Verifica si es pot parar la cerca actual amb la poda alfa-beta.
+                    if (alpha >= beta) {
+                        parar_busca = true;
+                    }
+                }
+            }
+        }
+
+        return millorMoviment;
+    }
+    */
+
+    
     private int heuristica (Gamestatus s){
         
         int h=0;
