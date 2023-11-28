@@ -1,6 +1,7 @@
 package edu.upc.epsevg.prop.checkers.players;
 
 
+import edu.upc.epsevg.prop.checkers.CellType;
 import edu.upc.epsevg.prop.checkers.GameStatus;
 import edu.upc.epsevg.prop.checkers.IAuto;
 import edu.upc.epsevg.prop.checkers.IPlayer;
@@ -39,7 +40,6 @@ public class MyPlayer implements IPlayer, IAuto {
      */
     @Override
     public PlayerMove move(GameStatus s) {
-
 
         List<MoveNode> moves =  s.getMoves();
 
@@ -108,9 +108,11 @@ public class MyPlayer implements IPlayer, IAuto {
         for (int i = 0; i <  moves.size(); i++) {
             MoveNode node = moves.get(i);
             List<Point> actualpoints = new ArrayList<>();
-            GameStatus aux = new Gamestatus(s);
+            //GameStatus aux = new Gamestatus(s);
             //Tauler aux = new Tauler(t);
-            if (aux.movpossible(columna)) {
+            actualpoints = recursive();
+            if (actualpoints points = actualpoints
+            /*if (aux.movpossible(columna)) {
                 aux.afegeix(columna, jugadorMaxim);
                 int valorHeuristic = minValor(aux,points, alpha, beta);
                 if (valorHeuristic > costActual) {
@@ -118,9 +120,40 @@ public class MyPlayer implements IPlayer, IAuto {
                    points = actualpoints;
                 }
                 alpha = Math.max(alpha, costActual);
-            }
+            }*/
         }
         return points;
+    }
+    
+    private int heuristica (Gamestatus s){
+        
+        int h=0;
+        int peo=0;
+        
+        for(int f=0; f < s.getSize(); f++){
+            for(int c=0;c < s.getSize();c++){
+                
+                CellType ct = new CellType();
+                ct = s.getPos(c,f);
+                
+                if(s.getCurrentPlayer()== PLAYER1){
+                    if(ct == P1){
+                        peo++;
+                    }
+                    if(ct == P2){
+                        peo--;
+                    }
+                    
+                }
+                if(s.getCurrentPlaer()== PLAYER2){
+                    
+                }
+                
+                
+            }
+        }
+        
+        return h;
     }
 
 }
