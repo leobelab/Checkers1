@@ -2,11 +2,15 @@ package edu.upc.epsevg.prop.checkers.players;
 
 
 import edu.upc.epsevg.prop.checkers.CellType;
+import static edu.upc.epsevg.prop.checkers.CellType.P1;
+import static edu.upc.epsevg.prop.checkers.CellType.P2;
 import edu.upc.epsevg.prop.checkers.GameStatus;
 import edu.upc.epsevg.prop.checkers.IAuto;
 import edu.upc.epsevg.prop.checkers.IPlayer;
 import edu.upc.epsevg.prop.checkers.MoveNode;
 import edu.upc.epsevg.prop.checkers.PlayerMove;
+import static edu.upc.epsevg.prop.checkers.PlayerType.PLAYER1;
+import static edu.upc.epsevg.prop.checkers.PlayerType.PLAYER2;
 import edu.upc.epsevg.prop.checkers.SearchType;
 import java.awt.Point;
 import java.util.ArrayList;
@@ -80,7 +84,7 @@ public class MyPlayer implements IPlayer, IAuto {
             points.add(node.getPoint());
         }
         */
-        */
+        
     }
     
 
@@ -123,42 +127,58 @@ public class MyPlayer implements IPlayer, IAuto {
         return points;
     }
     
-    private List<List<Point>> calmov( List<MoveNode> moves){
-        
-        List<List<Point>> lol = new List<List<Point>>();
-        
-        for(int i = 0; i < moves.size(); i++){
-            
-            MoveNode node = moves.get(i);
-            List<Point> lp = new List<Point>();
-            List<List<Point>> lol_aux = ds(node, lp);
-            lol.addAll(lol_aux);
+    /**
+     * Calcula el valor mínim en un estat del joc utilitzant recursió.
+     *
+     * @param t El tauler actual del joc.
+     * @param colTirada La columna de la tirada actual.
+     * @param depth La profunditat restant per explorar.
+     * @param alpha Límit inferior actual per a la poda alfa-beta.
+     * @param beta Límit superior actual per a la poda alfa-beta.
+     * @return El valor mínim calculat per a l'estat actual.
+     */
+    private int minValor(GameStatus s, int depth, int alpha, int beta) {
+        int millorMoviment = 20000;
 
+        // Verifica si la solució ja s'ha trobat per al jugador màxim.
+        if (s.checkGameOver()) {
+            return millorMoviment;
         }
         
-        return lol;
-       
+        // Verifica si s'ha arribat a la profunditat màxima o si no es poden fer més moviments.
+        if (depth == 0) {
+            return heuristica(s);
+        }
+        
+        boolean aturat = false;
+
+        List<MoveNode> moves =  s.getMoves();
+        List<Point> points = new ArrayList<>();
+        List<List<Point>> lol = calmov(moves);        
+        // Itera a través de les columnes del tauler per a les possibles moviments.
+        for (int i = 0; i < lol.size() && !aturat; i++) {
+            GameStatus aux = new GameStatus(s);
+
+            // Verifica si el moviment és possible.
+            
+                List<Point> intent = lol.get(i);
+                aux.movePiece(intent);
+                int fhMax = maxValor(aux, depth - 1, alpha, beta);
+
+                // Actualitza el millor moviment amb el valor mínim.
+                millorMoviment = Math.min(millorMoviment, fhMax);
+
+                // Realitza la poda alfa-beta.
+                beta = Math.min(millorMoviment, beta);
+
+                // Verifica si es pot parar la cerca actual amb la poda alfa-beta.
+                if (alpha >= beta) {
+                    aturat = true;
+                }
+        }
+
+        return millorMoviment;
     }
-    
-    private List<List<Point>> ds( MoveNode node, List<Point> lp){
-        
-        //List<List<Point>> lol = new List<List<Point>>();
-        
-        //List<Point> lp = new List<Point>();
-        lp.add(node.getPoint());
-        if(!node.getChildren().isEmpty()) {
-            ds(node.getChildren().get(0));
-            if(node.getChildren().size() > 1) {
-                ds(node.getChildren().get(1));
-            }
-        }
-        else {
-            afegir lp a llista general
-        }
-        return llistageneral;
-    }
-    
-    //funciones min max
     
         /**
      * Calcula el valor màxim en un estat del joc utilitzant recursió.
@@ -170,48 +190,118 @@ public class MyPlayer implements IPlayer, IAuto {
      * @param beta Límit superior actual per a la poda alfa-beta.
      * @return El valor màxim calculat per a l'estat actual.
      */
-    /*private int maxValor(Tauler t, int colTirada, int depth, int alpha, int beta) {
-        int valorHeuristic = -10000;
+    private int maxValor(GameStatus s, int depth, int alpha, int beta) {
+        int valorHeuristic = -20000;
 
         // Verifica si la solució ja s'ha trobat per al jugador mínim.
-        if (t.solucio(colTirada, jugadorMinim)) {
+        if (s.checkGameOver()) {
             return valorHeuristic;
         }
 
         // Verifica si s'ha arribat a la profunditat màxima o si no es poden fer més moviments.
-        if (depth == 0 || !t.espotmoure()) {
-            return heuristica(t);
+        if (depth == 0) {
+            return heuristica(s);
         }
 
-        boolean parar_busca = false;
+        boolean aturat = false;
 
+        List<MoveNode> moves =  s.getMoves();
+        List<Point> points = new ArrayList<>();
+        List<List<Point>> lol = calmov(moves);
         // Itera a través de les columnes del tauler per a les possibles moviments.
-        for (int i = 0; i < t.getMida() && !parar_busca; i++) {
-            Tauler aux = new Tauler(t);
+        for (int i = 0; i < lol.size() && !aturat; i++) {
+            GameStatus aux = new GameStatus(s);
 
-            // Verifica si el moviment és possible.
-            if (aux.movpossible(i)) {
-                aux.afegeix(i, jugadorMaxim);
-                int fhMin = minValor(aux, i, depth - 1, alpha, beta);
+            List<Point> intent = lol.get(i);
+            aux.movePiece(intent);
+            int fhMin = minValor(aux, depth - 1, alpha, beta);
 
-                // Actualitza el valor heurístic amb el valor màxim.
-                valorHeuristic = Math.max(valorHeuristic, fhMin);
+            // Actualitza el valor heurístic amb el valor màxim.
+            valorHeuristic = Math.max(valorHeuristic, fhMin);
 
-                // Realitza la poda alfa-beta si està habilitada.
-                if (poda) {
-                    alpha = Math.max(valorHeuristic, alpha);
+            // Realitza la poda alfa-beta si està habilitada.
 
-                    // Verifica si es pot parar la cerca actual amb la poda alfa-beta.
-                    if (alpha >= beta) {
-                        parar_busca = true;
-                    }
-                }
+            alpha = Math.max(valorHeuristic, alpha);
+            // Verifica si es pot parar la cerca actual amb la poda alfa-beta.
+            if (alpha >= beta) {
+                aturat = true;
             }
         }
 
         return valorHeuristic;
     }
-    */
+    
+    private List<List<Point>> calmov( List<MoveNode> moves){
+        
+        List<List<Point>> lol = new ArrayList<List<Point>>();
+        
+        for(int i = 0; i < moves.size(); i++){
+            
+            MoveNode node = moves.get(i);
+            List<Point> lp = new ArrayList<Point>();
+            List<List<Point>> lol_aux = new ArrayList<List<Point>>();
+            ds(node, lp, lol_aux);
+            lol.addAll(lol_aux);
+
+        }
+        
+        return lol;
+       
+    }
+    
+    private void ds( MoveNode node, List<Point> lp, List<List<Point>> lol_aux){
+        
+        //List<List<Point>> lol = new List<List<Point>>();
+        
+        //List<Point> lp = new List<Point>();
+        lp.add(node.getPoint());
+        if(!node.getChildren().isEmpty()) {
+            ds(node.getChildren().get(0), new ArrayList<>(lp), lol_aux);
+            if(node.getChildren().size() > 1) {
+                ds(node.getChildren().get(1), new ArrayList<>(lp), lol_aux);
+            }
+        }
+        else {
+            lol_aux.add(lp); //podemos lol_aux.add(new ArrayList<>(lp))
+        }
+    }
+       
+    private int heuristica (GameStatus s){
+        
+        int h=0;
+        int peo=0;
+        
+        for(int f=0; f < s.getSize(); f++){
+            for(int c=0;c < s.getSize();c++){
+                
+                CellType ct = s.getPos(c,f);
+                
+                if(s.getCurrentPlayer() == PLAYER1){
+                    if(ct == P1){
+                        peo++;
+                    }
+                    if(ct == P2){
+                        peo--;
+                    }
+                    
+                }
+                if(s.getCurrentPlayer()== PLAYER2){
+                    
+                }
+                
+                
+            }
+        }
+        
+        return h;
+        //return 0;
+    }
+    
+    
+    
+    
+    
+    
     /**
      * Calcula el valor mínim en un estat del joc utilitzant recursió.
      *
@@ -264,38 +354,5 @@ public class MyPlayer implements IPlayer, IAuto {
         return millorMoviment;
     }
     */
-
-    
-    private int heuristica (Gamestatus s){
-        
-        int h=0;
-        int peo=0;
-        
-        for(int f=0; f < s.getSize(); f++){
-            for(int c=0;c < s.getSize();c++){
-                
-                CellType ct = new CellType();
-                ct = s.getPos(c,f);
-                
-                if(s.getCurrentPlayer()== PLAYER1){
-                    if(ct == P1){
-                        peo++;
-                    }
-                    if(ct == P2){
-                        peo--;
-                    }
-                    
-                }
-                if(s.getCurrentPlayer()== PLAYER2){
-                    
-                }
-                
-                
-            }
-        }
-        
-        return h;
-    }
-    
 
 }
