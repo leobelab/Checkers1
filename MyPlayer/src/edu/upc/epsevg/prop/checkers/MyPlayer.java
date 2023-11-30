@@ -3,7 +3,9 @@ package edu.upc.epsevg.prop.checkers.players;
 
 import edu.upc.epsevg.prop.checkers.CellType;
 import static edu.upc.epsevg.prop.checkers.CellType.P1;
+import static edu.upc.epsevg.prop.checkers.CellType.P1Q;
 import static edu.upc.epsevg.prop.checkers.CellType.P2;
+import static edu.upc.epsevg.prop.checkers.CellType.P2Q;
 import edu.upc.epsevg.prop.checkers.GameStatus;
 import edu.upc.epsevg.prop.checkers.IAuto;
 import edu.upc.epsevg.prop.checkers.IPlayer;
@@ -46,9 +48,10 @@ public class MyPlayer implements IPlayer, IAuto {
     @Override
     public PlayerMove move(GameStatus s) {
 
-        List<MoveNode> moves =  s.getMoves();
-
-        Random rand = new Random();
+        List<Point> millor_jugada = minMax(s);
+        //System.out.println("Estats explorats: " + nodesExplorats);
+        
+        /*Random rand = new Random();
         int q = rand.nextInt(moves.size());
         List<Point> points = new ArrayList<>();
         MoveNode node = moves.get(q);
@@ -58,16 +61,8 @@ public class MyPlayer implements IPlayer, IAuto {
             int c = rand.nextInt(node.getChildren().size());
             node = node.getChildren().get(c);
             points.add(node.getPoint());
-        }
-        return new PlayerMove( points, 0L, 0, SearchType.RANDOM);         
-        
-        /*
-        
-        int millorMove = minMax(s);
-        System.out.println("Estats explorats: " + nodesExplorats);
-        return millorMove;
-        
-        */
+        }*/
+        return new PlayerMove( millor_jugada, 0L, 8, SearchType.MINIMAX);         
         
         /*
          List<MoveNode> moves =  s.getMoves();
@@ -279,20 +274,76 @@ public class MyPlayer implements IPlayer, IAuto {
                 if(s.getCurrentPlayer() == PLAYER1){
                     if(ct == P1){
                         peo++;
+                        /*boolean peo_segur = true;
+                        if((c += 1) < s.getSize()) {
+                            CellType ct_aux = s.getPos(c+1,f-1);
+                            if(ct_aux == P2 || ct_aux == P2Q) peo_segur = false;
+                        }
+                        if((c -= 1) > 0) {
+                            CellType ct_aux = s.getPos(c-1,f-1);
+                            if(ct_aux == P2 || ct_aux == P2Q) peo_segur = false;
+                        }
+                        if(peo_segur) peo += 3;*/
                     }
                     if(ct == P2){
                         peo--;
+                        /*boolean peo_segur = true;
+                        if((c += 1) < s.getSize()) {
+                            CellType ct_aux = s.getPos(c+1,f+1);
+                            if(ct_aux == P1 || ct_aux == P1Q) peo_segur = false;
+                        }
+                        if((c -= 1) > 0) {
+                            CellType ct_aux = s.getPos(c-1,f+1);
+                            if(ct_aux == P1|| ct_aux == P1Q) peo_segur = false;
+                        }
+                        if(peo_segur) peo -= 3;*/
+                    }
+                    if(ct == P1Q) {
+                        peo += 2;
+                    }
+                    if(ct == P2Q) {
+                        peo -= 2;
                     }
                     
                 }
-                if(s.getCurrentPlayer()== PLAYER2){
-                    
+                else if(s.getCurrentPlayer()== PLAYER2){
+                    if(ct == P1){
+                        peo--;
+                        /*boolean peo_segur = true;
+                        if((c += 1) < s.getSize()) {
+                            CellType ct_aux = s.getPos(c+1,f+1);
+                            if(ct_aux == P2 || ct_aux == P2Q) peo_segur = false;
+                        }
+                        if((c -= 1) > 0) {
+                            CellType ct_aux = s.getPos(c-1,f+1);
+                            if(ct_aux == P2 || ct_aux == P2Q) peo_segur = false;
+                        }
+                        if(peo_segur) peo += 3;*/
+                    }
+                    if(ct == P2){
+                        peo++;
+                        /*boolean peo_segur = true;
+                        if((c += 1) < s.getSize()) {
+                            CellType ct_aux = s.getPos(c+1,f-1);
+                            if(ct_aux == P1 || ct_aux == P1Q) peo_segur = false;
+                        }
+                        if((c -= 1) > 0) {
+                            CellType ct_aux = s.getPos(c-1,f-1);
+                            if(ct_aux == P1 || ct_aux == P1Q) peo_segur = false;
+                        }
+                        if(peo_segur) peo += 3;*/
+                    }
+                    if(ct == P1Q) {
+                        peo -= 2;
+                    }
+                    if(ct == P2Q) {
+                        peo += 2;
+                    }
                 }
-                
                 
             }
         }
-        
+        h=peo;
         return h;
         //return 0;
     }
