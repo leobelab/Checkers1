@@ -2,6 +2,7 @@ package edu.upc.epsevg.prop.checkers.players;
 
 
 import edu.upc.epsevg.prop.checkers.CellType;
+import static edu.upc.epsevg.prop.checkers.CellType.EMPTY;
 import static edu.upc.epsevg.prop.checkers.CellType.P1;
 import static edu.upc.epsevg.prop.checkers.CellType.P1Q;
 import static edu.upc.epsevg.prop.checkers.CellType.P2;
@@ -11,6 +12,7 @@ import edu.upc.epsevg.prop.checkers.IAuto;
 import edu.upc.epsevg.prop.checkers.IPlayer;
 import edu.upc.epsevg.prop.checkers.MoveNode;
 import edu.upc.epsevg.prop.checkers.PlayerMove;
+import edu.upc.epsevg.prop.checkers.PlayerType;
 import static edu.upc.epsevg.prop.checkers.PlayerType.PLAYER1;
 import static edu.upc.epsevg.prop.checkers.PlayerType.PLAYER2;
 import edu.upc.epsevg.prop.checkers.SearchType;
@@ -27,7 +29,10 @@ public class MyPlayer implements IPlayer, IAuto {
 
     private String name;
     private GameStatus s;
-    private int profunditat=4;
+    private int profunditat=8;
+    private PlayerType playerteu;
+    private PlayerType playeradversari;
+
 
     public MyPlayer(String name) {
         this.name = name;
@@ -47,7 +52,8 @@ public class MyPlayer implements IPlayer, IAuto {
      */
     @Override
     public PlayerMove move(GameStatus s) {
-
+        playerteu = s.getCurrentPlayer();
+        playeradversari = PlayerType.opposite(playerteu);
         List<Point> millor_jugada = minMax(s);
         //System.out.println("Estats explorats: " + nodesExplorats);
         
@@ -137,7 +143,8 @@ public class MyPlayer implements IPlayer, IAuto {
 
         // Verifica si la solució ja s'ha trobat per al jugador màxim.
         if (s.checkGameOver()) {
-            return millorMoviment;
+            if(s.GetWinner() == playerteu) return millorMoviment;
+            else return 0; //CAS D'EMPAT
         }
         
         // Verifica si s'ha arribat a la profunditat màxima o si no es poden fer més moviments.
@@ -190,7 +197,8 @@ public class MyPlayer implements IPlayer, IAuto {
 
         // Verifica si la solució ja s'ha trobat per al jugador mínim.
         if (s.checkGameOver()) {
-            return valorHeuristic;
+            if(s.GetWinner() == playeradversari) return valorHeuristic;
+            else return 0; //CAS D'EMPAT
         }
 
         // Verifica si s'ha arribat a la profunditat màxima o si no es poden fer més moviments.
@@ -259,95 +267,107 @@ public class MyPlayer implements IPlayer, IAuto {
         else {
             lol_aux.add(lp); //podemos lol_aux.add(new ArrayList<>(lp))
         }
-    }
-       
+    } 
+    
     private int heuristica (GameStatus s){
         
         int h=0;
-        int peo=0;
         
-        for(int f=0; f < s.getSize(); f++){
-            for(int c=0;c < s.getSize();c++){
-                
-                CellType ct = s.getPos(c,f);
-                
-                if(s.getCurrentPlayer() == PLAYER1){
-                    if(ct == P1){
-                        peo++;
-                        /*boolean peo_segur = true;
-                        if((c += 1) < s.getSize()) {
-                            CellType ct_aux = s.getPos(c+1,f-1);
-                            if(ct_aux == P2 || ct_aux == P2Q) peo_segur = false;
-                        }
-                        if((c -= 1) > 0) {
-                            CellType ct_aux = s.getPos(c-1,f-1);
-                            if(ct_aux == P2 || ct_aux == P2Q) peo_segur = false;
-                        }
-                        if(peo_segur) peo += 3;*/
-                    }
-                    if(ct == P2){
-                        peo--;
-                        /*boolean peo_segur = true;
-                        if((c += 1) < s.getSize()) {
-                            CellType ct_aux = s.getPos(c+1,f+1);
-                            if(ct_aux == P1 || ct_aux == P1Q) peo_segur = false;
-                        }
-                        if((c -= 1) > 0) {
-                            CellType ct_aux = s.getPos(c-1,f+1);
-                            if(ct_aux == P1|| ct_aux == P1Q) peo_segur = false;
-                        }
-                        if(peo_segur) peo -= 3;*/
-                    }
-                    if(ct == P1Q) {
-                        peo += 2;
-                    }
-                    if(ct == P2Q) {
-                        peo -= 2;
-                    }
-                    
-                }
-                else if(s.getCurrentPlayer()== PLAYER2){
-                    if(ct == P1){
-                        peo--;
-                        /*boolean peo_segur = true;
-                        if((c += 1) < s.getSize()) {
-                            CellType ct_aux = s.getPos(c+1,f+1);
-                            if(ct_aux == P2 || ct_aux == P2Q) peo_segur = false;
-                        }
-                        if((c -= 1) > 0) {
-                            CellType ct_aux = s.getPos(c-1,f+1);
-                            if(ct_aux == P2 || ct_aux == P2Q) peo_segur = false;
-                        }
-                        if(peo_segur) peo += 3;*/
-                    }
-                    if(ct == P2){
-                        peo++;
-                        /*boolean peo_segur = true;
-                        if((c += 1) < s.getSize()) {
-                            CellType ct_aux = s.getPos(c+1,f-1);
-                            if(ct_aux == P1 || ct_aux == P1Q) peo_segur = false;
-                        }
-                        if((c -= 1) > 0) {
-                            CellType ct_aux = s.getPos(c-1,f-1);
-                            if(ct_aux == P1 || ct_aux == P1Q) peo_segur = false;
-                        }
-                        if(peo_segur) peo += 3;*/
-                    }
-                    if(ct == P1Q) {
-                        peo -= 2;
-                    }
-                    if(ct == P2Q) {
-                        peo += 2;
-                    }
+        int diferencia_fitxes = nombre_fitxes(s, playerteu) - nombre_fitxes(s, playeradversari);
+        int diferencia_peons_segurs = nombre_fitxes_segures(s, playerteu) - nombre_fitxes_segures(s, playeradversari);
+        int diferencia_moveable_peons = nombre_moveable_fitxes(s, playerteu) - nombre_moveable_fitxes(s, playeradversari);
+        int diferencia_promotion_line = nombre_promotion_line(s, playerteu) - nombre_promotion_line(s, playeradversari);
+        
+        h += diferencia_fitxes + diferencia_peons_segurs + diferencia_moveable_peons;
+        return h;
+    }
+    
+    private int nombre_fitxes (GameStatus s, PlayerType player){ 
+        int n = 0;
+        for(int i = 0; i < s.getSize(); i++) {
+            for(int j = 0; j < s.getSize(); j++){
+                if(s.getPos(i, j).getPlayer() == player) {
+                    ++n;
+                    if(s.getPos(i, j).isQueen()) ++n;
                 }
                 
             }
         }
-        h=peo;
-        return h;
-        //return 0;
+        return n;
     }
     
+    private int nombre_fitxes_segures (GameStatus s, PlayerType player){ 
+        int n = 0;
+        int c;
+        boolean segur;
+        PlayerType adversari = PlayerType.opposite(player);
+        for(int i = 0; i < s.getSize(); i++) {
+            for(int j = 0; j < s.getSize(); j++){
+                if(s.getPos(i, j).getPlayer() == player) {
+                    int dir = s.getYDirection(player);
+                    c = j+1;
+                    segur = true;
+                    if(c < s.getSize() && (c-2) > 0 && (i-dir) >= 0 && (i-dir) < s.getSize() && (i+dir) >=0 && (i+dir) < s.getSize()) {
+                        if(s.getPos(i+dir, j+1).getPlayer() == adversari ) {
+                            if(s.getPos(i-dir, j-1) == EMPTY) segur = false;
+                        }
+                        if(segur && s.getPos(i+dir, j-1).getPlayer() == adversari) {
+                            if(s.getPos(i-dir, j+1) == EMPTY) segur = false;
+                        }
+                        if(segur && s.getPos(i-dir, j+1).getPlayer() == adversari && s.getPos(i-dir,j+1).isQueen()){
+                            if(s.getPos(i+dir, j-1) == EMPTY) segur = false;
+                        }
+                        if(segur && s.getPos(i-dir, j-1).getPlayer() == adversari && s.getPos(i-dir,j-1).isQueen()){
+                            if(s.getPos(i+dir, j+1) == EMPTY) segur = false;
+                        }
+                    }
+                    if(segur) n += 2;
+                    if(s.getPos(i, j).isQueen() && segur) ++n;
+                }
+                
+            }
+        }
+        return n;
+    }
+
+    private int nombre_moveable_fitxes (GameStatus s, PlayerType player){ 
+        int n = 0;
+        int c;
+        boolean moveable;
+        PlayerType adversari = PlayerType.opposite(player);
+        for(int i = 0; i < s.getSize(); i++) {
+            for(int j = 0; j < s.getSize(); j++){
+                if(s.getPos(i, j).getPlayer() == player) {
+                    int dir = s.getYDirection(player);
+                    c = j+1;
+                    moveable = false;
+                    if((i+dir) >=0 && (i+dir) < s.getSize()) {
+                        if(c < s.getSize() && s.getPos(i+dir, j+1) == EMPTY) moveable = true; 
+                        else if ((c-2) > 0 && s.getPos(i+dir, j-1) == EMPTY) moveable = true;
+                    }
+                    if(!moveable && s.getPos(i, j).isQueen() && (i-dir) >= 0 && (i-dir) < s.getSize()) {
+                        if(c < s.getSize() && s.getPos(i-dir, j+1) == EMPTY) moveable = true; 
+                        else if ((c-2) > 0 && s.getPos(i-dir, j-1) == EMPTY) moveable = true;
+                    }
+                    if(moveable) n += 3;
+                    if(s.getPos(i, j).isQueen() && moveable) ++n;
+                }
+                
+            }
+        }
+        return n;
+    }
+    
+     private int nombre_promotion_line(GameStatus s, PlayerType player){ 
+        int n = 0;
+        int i = 0;
+        if(player == PLAYER2) i = s.getSize()-1;
+        for(int j = 0; j < s.getSize(); j++) {
+            if(s.getPos(i, j) == EMPTY) ++n;
+                
+        }
+        return n;
+    }
     
     
     
@@ -405,5 +425,12 @@ public class MyPlayer implements IPlayer, IAuto {
         return millorMoviment;
     }
     */
+    
+    
+    
+    
+    
+    
+    
 
 }
