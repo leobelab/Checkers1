@@ -3,6 +3,7 @@ package edu.upc.epsevg.prop.checkers;
 import edu.upc.epsevg.prop.checkers.players.HumanPlayer;
 import edu.upc.epsevg.prop.checkers.players.RandomPlayer;
 import edu.upc.epsevg.prop.checkers.IPlayer;
+import edu.upc.epsevg.prop.checkers.players.MyIDSPlayer;
 import edu.upc.epsevg.prop.checkers.players.MyPlayer;
 import edu.upc.epsevg.prop.checkers.players.OnePiecePlayer;
 

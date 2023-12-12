@@ -30,10 +30,10 @@ public class MyIDSPlayer implements IPlayer, IAuto {
 
     private String name;
     private GameStatus s;
-    private int profunditat=8;
+    private int profunditat=12;
     private PlayerType playerteu;
     private PlayerType playeradversari;
-
+    private boolean timeout;
 
     public MyIDSPlayer(String name) {
         this.name = name;
@@ -41,7 +41,7 @@ public class MyIDSPlayer implements IPlayer, IAuto {
 
     @Override
     public void timeout() {
-        // Nothing to do! I'm so fast, I never timeout 8-)
+        timeout = true;
     }
 
     /**
@@ -55,7 +55,9 @@ public class MyIDSPlayer implements IPlayer, IAuto {
     public PlayerMove move(GameStatus s) {
         playerteu = s.getCurrentPlayer();
         playeradversari = PlayerType.opposite(playerteu);
+        timeout = false;
         List<Point> millor_jugada = minMax(s);
+        if(timeout) System.out.println("saltat");
         //System.out.println("Estats explorats: " + nodesExplorats);
         
         /*Random rand = new Random();
@@ -113,7 +115,7 @@ public class MyIDSPlayer implements IPlayer, IAuto {
         List<Point> points = new ArrayList<>();
         int alpha = Integer.MIN_VALUE, beta = Integer.MAX_VALUE;
         List<List<Point>> lol = calmov(moves);
-        for (int i = 0; i <  lol.size(); i++) {
+        for (int i = 0; i <  lol.size() && !timeout; i++) {
             GameStatus aux = new GameStatus(s);
             List<Point> intent = lol.get(i);
             aux.movePiece(intent);
@@ -159,7 +161,7 @@ public class MyIDSPlayer implements IPlayer, IAuto {
         List<Point> points = new ArrayList<>();
         List<List<Point>> lol = calmov(moves);        
         // Itera a través de les columnes del tauler per a les possibles moviments.
-        for (int i = 0; i < lol.size() && !aturat; i++) {
+        for (int i = 0; i < lol.size() && !aturat &&!timeout; i++) {
             GameStatus aux = new GameStatus(s);
 
             // Verifica si el moviment és possible.
@@ -213,7 +215,7 @@ public class MyIDSPlayer implements IPlayer, IAuto {
         List<Point> points = new ArrayList<>();
         List<List<Point>> lol = calmov(moves);
         // Itera a través de les columnes del tauler per a les possibles moviments.
-        for (int i = 0; i < lol.size() && !aturat; i++) {
+        for (int i = 0; i < lol.size() && !aturat && !timeout; i++) {
             GameStatus aux = new GameStatus(s);
 
             List<Point> intent = lol.get(i);
