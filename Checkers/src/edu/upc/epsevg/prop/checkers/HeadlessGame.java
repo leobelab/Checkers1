@@ -26,7 +26,7 @@ public class HeadlessGame {
     public static void main(String[] args) {
 
         IPlayer player1 = new OnePiecePlayer(1);//GB
-        IPlayer player2 = new RandomPlayer("player");
+        IPlayer player2 = new MyPlayer("player");
 
         HeadlessGame game = new HeadlessGame(player1, player2, 1/*s timeout*/, 10/*games*/);
         GameResult gr = game.start();

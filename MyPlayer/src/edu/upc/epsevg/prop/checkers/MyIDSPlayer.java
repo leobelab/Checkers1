@@ -21,19 +21,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+
 /**
  * Jugador aleatori
  * @author LBL
  */
-public class MyPlayer implements IPlayer, IAuto {
+public class MyIDSPlayer implements IPlayer, IAuto {
 
     private String name;
     private GameStatus s;
-    private int profunditat=16;
+    private int profunditat=8;
     private PlayerType playerteu;
     private PlayerType playeradversari;
 
-    public MyPlayer(String name) {
+
+    public MyIDSPlayer(String name) {
         this.name = name;
     }
 
@@ -348,7 +350,7 @@ public class MyPlayer implements IPlayer, IAuto {
                         if(c < s.getSize() && s.getPos(i-dir, j+1) == EMPTY) moveable = true; 
                         else if ((c-2) > 0 && s.getPos(i-dir, j-1) == EMPTY) moveable = true;
                     }
-                    if(moveable) n += 1;
+                    if(moveable) n += 3;
                     if(s.getPos(i, j).isQueen() && moveable) ++n;
                 }
                 

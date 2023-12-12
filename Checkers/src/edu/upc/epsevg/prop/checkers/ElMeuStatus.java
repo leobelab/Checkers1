@@ -16,5 +16,5 @@ public class ElMeuStatus extends GameStatus {
      public ElMeuStatus(GameStatus gs){
         super(gs);
     }
-    
+    //Si volem fer el getHash ho fem millor aquí per no embrutar el codi.
 }
