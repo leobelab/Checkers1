@@ -30,10 +30,9 @@ public class MyIDSPlayer implements IPlayer, IAuto {
 
     private String name;
     private GameStatus s;
-    private int profunditat=12;
     private PlayerType playerteu;
     private PlayerType playeradversari;
-    private boolean timeout;
+    private boolean timeout = false;
 
     public MyIDSPlayer(String name) {
         this.name = name;
@@ -41,7 +40,8 @@ public class MyIDSPlayer implements IPlayer, IAuto {
 
     @Override
     public void timeout() {
-        timeout = true;
+      
+        //timeout = true;
     }
 
     /**
@@ -56,39 +56,22 @@ public class MyIDSPlayer implements IPlayer, IAuto {
         playerteu = s.getCurrentPlayer();
         playeradversari = PlayerType.opposite(playerteu);
         timeout = false;
-        List<Point> millor_jugada = minMax(s);
-        if(timeout) System.out.println("saltat");
-        //System.out.println("Estats explorats: " + nodesExplorats);
-        
-        /*Random rand = new Random();
-        int q = rand.nextInt(moves.size());
-        List<Point> points = new ArrayList<>();
-        MoveNode node = moves.get(q);
-        points.add(node.getPoint());
-        
-        while(!node.getChildren().isEmpty()) {
-            int c = rand.nextInt(node.getChildren().size());
-            node = node.getChildren().get(c);
-            points.add(node.getPoint());
-        }*/
-        return new PlayerMove( millor_jugada, 0L, 8, SearchType.MINIMAX);         
-        
-        /*
-         List<MoveNode> moves =  s.getMoves();
-
-        Random rand = new Random();
-        int q = rand.nextInt(moves.size());
-        List<Point> points = new ArrayList<>();
-        MoveNode node = moves.get(q);
-        points.add(node.getPoint());
-        
-        while(!node.getChildren().isEmpty()) {
-            int c = rand.nextInt(node.getChildren().size());
-            node = node.getChildren().get(c);
-            points.add(node.getPoint());
+        List<Point> millor_jugada = minMax(s, 8);
+        List<Point> jugada_calculada = new ArrayList();
+        int i = 10;
+        /*while(!timeout) {
+            jugada_calculada = minMax(s, i);
+            if(!timeout) {
+                millor_jugada = jugada_calculada;
+                i += 2;
+            }
+            
         }
-        */
+        i -= 2;*/
         
+        return new PlayerMove( millor_jugada, 0L, i, SearchType.MINIMAX_IDS);         
+        
+      
     }
     
 
@@ -98,7 +81,7 @@ public class MyIDSPlayer implements IPlayer, IAuto {
      */
     @Override
     public String getName() {
-        return "Random(" + name + ")";
+        return "MyIDSPlayer";
     }
 
     
@@ -109,13 +92,13 @@ public class MyIDSPlayer implements IPlayer, IAuto {
      * @param t El tauler actual del joc.
      * @return La columna on es realitzarà el millor moviment.
      */
-    private List<Point> minMax(GameStatus s) {
+    private List<Point> minMax(GameStatus s, int profunditat) {
         int costActual = -20000;
         List<MoveNode> moves =  s.getMoves();
         List<Point> points = new ArrayList<>();
         int alpha = Integer.MIN_VALUE, beta = Integer.MAX_VALUE;
         List<List<Point>> lol = calmov(moves);
-        for (int i = 0; i <  lol.size() && !timeout; i++) {
+        for (int i = 0; i <  lol.size() /*&& !timeout*/; i++) {
             GameStatus aux = new GameStatus(s);
             List<Point> intent = lol.get(i);
             aux.movePiece(intent);
@@ -152,7 +135,7 @@ public class MyIDSPlayer implements IPlayer, IAuto {
         
         // Verifica si s'ha arribat a la profunditat màxima o si no es poden fer més moviments.
         if (depth == 0) {
-            return heuristica(s);
+            return MyPlayer.heuristica(s);
         }
         
         boolean aturat = false;
@@ -161,7 +144,7 @@ public class MyIDSPlayer implements IPlayer, IAuto {
         List<Point> points = new ArrayList<>();
         List<List<Point>> lol = calmov(moves);        
         // Itera a través de les columnes del tauler per a les possibles moviments.
-        for (int i = 0; i < lol.size() && !aturat &&!timeout; i++) {
+        for (int i = 0; i < lol.size() && !aturat /*&&!timeout*/; i++) {
             GameStatus aux = new GameStatus(s);
 
             // Verifica si el moviment és possible.
@@ -206,7 +189,7 @@ public class MyIDSPlayer implements IPlayer, IAuto {
 
         // Verifica si s'ha arribat a la profunditat màxima o si no es poden fer més moviments.
         if (depth == 0) {
-            return heuristica(s);
+            return MyPlayer.heuristica(s);
         }
 
         boolean aturat = false;
@@ -215,7 +198,7 @@ public class MyIDSPlayer implements IPlayer, IAuto {
         List<Point> points = new ArrayList<>();
         List<List<Point>> lol = calmov(moves);
         // Itera a través de les columnes del tauler per a les possibles moviments.
-        for (int i = 0; i < lol.size() && !aturat && !timeout; i++) {
+        for (int i = 0; i < lol.size() && !aturat /*&& !timeout*/; i++) {
             GameStatus aux = new GameStatus(s);
 
             List<Point> intent = lol.get(i);
@@ -271,7 +254,7 @@ public class MyIDSPlayer implements IPlayer, IAuto {
             lol_aux.add(lp); //podemos lol_aux.add(new ArrayList<>(lp))
         }
     } 
-    
+   /* 
     private int heuristica (GameStatus s){
         
         int h=0;
@@ -370,62 +353,6 @@ public class MyIDSPlayer implements IPlayer, IAuto {
                 
         }
         return n;
-    }
-    
-    
-    
-    
-    
-    /**
-     * Calcula el valor mínim en un estat del joc utilitzant recursió.
-     *
-     * @param t El tauler actual del joc.
-     * @param colTirada La columna de la tirada actual.
-     * @param depth La profunditat restant per explorar.
-     * @param alpha Límit inferior actual per a la poda alfa-beta.
-     * @param beta Límit superior actual per a la poda alfa-beta.
-     * @return El valor mínim calculat per a l'estat actual.
-     */
-    /*private int minValor(Tauler t, int colTirada, int depth, int alpha, int beta) {
-        int millorMoviment = 10000;
-
-        // Verifica si la solució ja s'ha trobat per al jugador màxim.
-        if (t.solucio(colTirada, jugadorMaxim)) {
-            return millorMoviment;
-        }
-
-        // Verifica si s'ha arribat a la profunditat màxima o si no es poden fer més moviments.
-        if (depth == 0 || !t.espotmoure()) {
-            return heuristica(t);
-        }
-
-        boolean parar_busca = false;
-
-        // Itera a través de les columnes del tauler per a les possibles moviments.
-        for (int i = 0; i < t.getMida() && !parar_busca; i++) {
-            Tauler aux = new Tauler(t);
-
-            // Verifica si el moviment és possible.
-            if (aux.movpossible(i)) {
-                aux.afegeix(i, jugadorMinim);
-                int fhMax = maxValor(aux, i, depth - 1, alpha, beta);
-
-                // Actualitza el millor moviment amb el valor mínim.
-                millorMoviment = Math.min(millorMoviment, fhMax);
-
-                // Realitza la poda alfa-beta si està habilitada.
-                if (poda) {
-                    beta = Math.min(millorMoviment, beta);
-
-                    // Verifica si es pot parar la cerca actual amb la poda alfa-beta.
-                    if (alpha >= beta) {
-                        parar_busca = true;
-                    }
-                }
-            }
-        }
-
-        return millorMoviment;
     }
     */
     

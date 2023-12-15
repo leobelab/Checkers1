@@ -30,8 +30,8 @@ public class MyPlayer implements IPlayer, IAuto {
     private String name;
     private GameStatus s;
     private int profunditat=8;
-    private PlayerType playerteu;
-    private PlayerType playeradversari;
+    public static PlayerType playerteu;
+    public static PlayerType playeradversari;
 
     public MyPlayer(String name) {
         this.name = name;
@@ -54,36 +54,10 @@ public class MyPlayer implements IPlayer, IAuto {
         playerteu = s.getCurrentPlayer();
         playeradversari = PlayerType.opposite(playerteu);
         List<Point> millor_jugada = minMax(s);
-        //System.out.println("Estats explorats: " + nodesExplorats);
         
-        /*Random rand = new Random();
-        int q = rand.nextInt(moves.size());
-        List<Point> points = new ArrayList<>();
-        MoveNode node = moves.get(q);
-        points.add(node.getPoint());
+        return new PlayerMove( millor_jugada, 0L, profunditat, SearchType.MINIMAX);         
         
-        while(!node.getChildren().isEmpty()) {
-            int c = rand.nextInt(node.getChildren().size());
-            node = node.getChildren().get(c);
-            points.add(node.getPoint());
-        }*/
-        return new PlayerMove( millor_jugada, 0L, 8, SearchType.MINIMAX);         
-        
-        /*
-         List<MoveNode> moves =  s.getMoves();
-
-        Random rand = new Random();
-        int q = rand.nextInt(moves.size());
-        List<Point> points = new ArrayList<>();
-        MoveNode node = moves.get(q);
-        points.add(node.getPoint());
-        
-        while(!node.getChildren().isEmpty()) {
-            int c = rand.nextInt(node.getChildren().size());
-            node = node.getChildren().get(c);
-            points.add(node.getPoint());
-        }
-        */
+       
         
     }
     
@@ -94,7 +68,7 @@ public class MyPlayer implements IPlayer, IAuto {
      */
     @Override
     public String getName() {
-        return "Random(" + name + ")";
+        return "MyPlayer";
     }
 
     
@@ -268,7 +242,7 @@ public class MyPlayer implements IPlayer, IAuto {
         }
     } 
     
-    private int n_fitxes (GameStatus s, PlayerType player){ 
+    private static int n_fitxes (GameStatus s, PlayerType player){ 
         int n_fitxes = 0;
         for(int i = 0; i < s.getSize(); i++) {
             for(int j = 0; j < s.getSize(); j++){
@@ -281,7 +255,7 @@ public class MyPlayer implements IPlayer, IAuto {
         return n_fitxes;
     }
     
-    private int heuristica (GameStatus s){
+    public static int heuristica (GameStatus s){
         
         int h=0;
         
@@ -294,7 +268,7 @@ public class MyPlayer implements IPlayer, IAuto {
         return h;
     }
     
-    private int nombre_fitxes (GameStatus s, PlayerType player){ 
+    private static int nombre_fitxes (GameStatus s, PlayerType player){ 
         int n = 0;
         int meitat = s.getSize()/2;
         for(int i = 0; i < s.getSize(); i++) {
@@ -312,7 +286,7 @@ public class MyPlayer implements IPlayer, IAuto {
         return n;
     }
     
-    private int nombre_fitxes_segures (GameStatus s, PlayerType player){ 
+    private static int nombre_fitxes_segures (GameStatus s, PlayerType player){ 
         int n = 0;
         int c;
         boolean segur;
@@ -347,7 +321,7 @@ public class MyPlayer implements IPlayer, IAuto {
         return n;
     }
 
-    private int nombre_moveable_fitxes (GameStatus s, PlayerType player){ 
+    private static int nombre_moveable_fitxes (GameStatus s, PlayerType player){ 
         int n = 0;
         int c;
         boolean moveable;
@@ -376,7 +350,7 @@ public class MyPlayer implements IPlayer, IAuto {
         return n;
     }
     
-     private int nombre_promotion_line(GameStatus s, PlayerType player){ 
+     private static int nombre_promotion_line(GameStatus s, PlayerType player){ 
         int n = 0;
         int i = 0;
         if(player == PLAYER2) i = s.getSize()-1;
