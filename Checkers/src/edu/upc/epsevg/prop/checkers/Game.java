@@ -4,6 +4,7 @@ import edu.upc.epsevg.prop.checkers.players.HumanPlayer;
 import edu.upc.epsevg.prop.checkers.players.RandomPlayer;
 import edu.upc.epsevg.prop.checkers.IPlayer;
 import edu.upc.epsevg.prop.checkers.players.MyIDSPlayer;
+import edu.upc.epsevg.prop.checkers.players.MyIDSPlayer2;
 import edu.upc.epsevg.prop.checkers.players.MyPlayer;
 import edu.upc.epsevg.prop.checkers.players.OnePiecePlayer;
 
@@ -26,7 +27,7 @@ public class Game {
             public void run() {
                 
                 IPlayer player1 = new OnePiecePlayer(1);
-                IPlayer player2 = new MyIDSPlayer("MyPlayer");
+                IPlayer player2 = new MyPlayer("MyPlayer");
                 //IPlayer player1 = new RandomPlayer("Kamikaze 1");
                 //IPlayer player2 = new RandomPlayer("Kamikaze 2");
                                 

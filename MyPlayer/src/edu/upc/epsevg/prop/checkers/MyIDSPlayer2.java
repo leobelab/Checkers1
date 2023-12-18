@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package edu.upc.epsevg.prop.checkers.players;
 
 
@@ -21,27 +25,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-
 /**
  * Jugador aleatori
  * @author LBL
  */
-public class MyIDSPlayer implements IPlayer, IAuto {
+public class MyIDSPlayer2 implements IPlayer, IAuto {
 
     private String name;
     private GameStatus s;
-    private PlayerType playerteu;
-    private PlayerType playeradversari;
+    public static PlayerType playerteu;
+    public static PlayerType playeradversari;
     private boolean timeout = false;
+    private int nodes_explorats = 0;
 
-    public MyIDSPlayer(String name) {
+    public MyIDSPlayer2(String name) {
         this.name = name;
     }
 
     @Override
     public void timeout() {
-      
-        //timeout = true;
+        // Nothing to do! I'm so fast, I never timeout 8-)
+        timeout = true;
     }
 
     /**
@@ -53,25 +57,24 @@ public class MyIDSPlayer implements IPlayer, IAuto {
      */
     @Override
     public PlayerMove move(GameStatus s) {
+        timeout = false;
         playerteu = s.getCurrentPlayer();
         playeradversari = PlayerType.opposite(playerteu);
-        timeout = false;
-        List<Point> millor_jugada = minMax(s, 8);
+        List<Point> millor_jugada = minMax(s, 2);
         List<Point> jugada_calculada = new ArrayList();
-        int i = 10;
-        /*while(!timeout) {
-            jugada_calculada = minMax(s, i);
+        int i = 4;
+        while(!timeout) {
+            jugada_calculada = minMax(s,i);
             if(!timeout) {
                 millor_jugada = jugada_calculada;
                 i += 2;
             }
-            
         }
-        i -= 2;*/
+        i -=2;
+        return new PlayerMove( millor_jugada, nodes_explorats, i, SearchType.MINIMAX);         
         
-        return new PlayerMove( millor_jugada, 0L, i, SearchType.MINIMAX_IDS);         
+       
         
-      
     }
     
 
@@ -81,7 +84,7 @@ public class MyIDSPlayer implements IPlayer, IAuto {
      */
     @Override
     public String getName() {
-        return "MyIDSPlayer";
+        return "MyIDS2Player";
     }
 
     
@@ -98,7 +101,7 @@ public class MyIDSPlayer implements IPlayer, IAuto {
         List<Point> points = new ArrayList<>();
         int alpha = Integer.MIN_VALUE, beta = Integer.MAX_VALUE;
         List<List<Point>> lol = calmov(moves);
-        for (int i = 0; i <  lol.size() /*&& !timeout*/; i++) {
+        for (int i = 0; i <  lol.size() && !timeout; i++) {
             GameStatus aux = new GameStatus(s);
             List<Point> intent = lol.get(i);
             aux.movePiece(intent);
@@ -135,7 +138,7 @@ public class MyIDSPlayer implements IPlayer, IAuto {
         
         // Verifica si s'ha arribat a la profunditat màxima o si no es poden fer més moviments.
         if (depth == 0) {
-            return 0;//MyPlayer.heuristica(s);
+            return heuristica(s);
         }
         
         boolean aturat = false;
@@ -144,7 +147,7 @@ public class MyIDSPlayer implements IPlayer, IAuto {
         List<Point> points = new ArrayList<>();
         List<List<Point>> lol = calmov(moves);        
         // Itera a través de les columnes del tauler per a les possibles moviments.
-        for (int i = 0; i < lol.size() && !aturat /*&&!timeout*/; i++) {
+        for (int i = 0; i < lol.size() && !aturat && !timeout; i++) {
             GameStatus aux = new GameStatus(s);
 
             // Verifica si el moviment és possible.
@@ -189,7 +192,7 @@ public class MyIDSPlayer implements IPlayer, IAuto {
 
         // Verifica si s'ha arribat a la profunditat màxima o si no es poden fer més moviments.
         if (depth == 0) {
-            return 0; //MyPlayer.heuristica(s);
+            return heuristica(s);
         }
 
         boolean aturat = false;
@@ -198,7 +201,7 @@ public class MyIDSPlayer implements IPlayer, IAuto {
         List<Point> points = new ArrayList<>();
         List<List<Point>> lol = calmov(moves);
         // Itera a través de les columnes del tauler per a les possibles moviments.
-        for (int i = 0; i < lol.size() && !aturat /*&& !timeout*/; i++) {
+        for (int i = 0; i < lol.size() && !aturat && !timeout; i++) {
             GameStatus aux = new GameStatus(s);
 
             List<Point> intent = lol.get(i);
@@ -254,11 +257,24 @@ public class MyIDSPlayer implements IPlayer, IAuto {
             lol_aux.add(lp); //podemos lol_aux.add(new ArrayList<>(lp))
         }
     } 
-   /* 
-    private int heuristica (GameStatus s){
+    
+    private static int n_fitxes (GameStatus s, PlayerType player){ 
+        int n_fitxes = 0;
+        for(int i = 0; i < s.getSize(); i++) {
+            for(int j = 0; j < s.getSize(); j++){
+                if(s.getPos(i, j).getPlayer() == player) {
+                    ++n_fitxes;
+                }
+                
+            }
+        }
+        return n_fitxes;
+    }
+    
+    public int heuristica (GameStatus s){
         
         int h=0;
-        
+        nodes_explorats++;
         int diferencia_fitxes = nombre_fitxes(s, playerteu) - nombre_fitxes(s, playeradversari);
         int diferencia_peons_segurs = nombre_fitxes_segures(s, playerteu) - nombre_fitxes_segures(s, playeradversari);
         int diferencia_moveable_peons = nombre_moveable_fitxes(s, playerteu) - nombre_moveable_fitxes(s, playeradversari);
@@ -268,21 +284,26 @@ public class MyIDSPlayer implements IPlayer, IAuto {
         return h;
     }
     
-    private int nombre_fitxes (GameStatus s, PlayerType player){ 
+    private static int nombre_fitxes (GameStatus s, PlayerType player){ 
         int n = 0;
+        int meitat = s.getSize()/2;
         for(int i = 0; i < s.getSize(); i++) {
             for(int j = 0; j < s.getSize(); j++){
                 if(s.getPos(i, j).getPlayer() == player) {
                     ++n;
+                    if(player == PLAYER1 && i > meitat) n += 1;
+                    else if(player == PLAYER2 && i < meitat) n += 1;    
+                    //int dist_centro = Math.abs(s.getSize()/2 - i) + Math.abs(s.getSize()/2 - j);
+                    //n += (s.getSize() - dist_centro)/2;
                     if(s.getPos(i, j).isQueen()) ++n;
+                    if(n_fitxes(s, player) < 5) n += 2;
                 }
-                
             }
         }
         return n;
     }
     
-    private int nombre_fitxes_segures (GameStatus s, PlayerType player){ 
+    private static int nombre_fitxes_segures (GameStatus s, PlayerType player){ 
         int n = 0;
         int c;
         boolean segur;
@@ -307,8 +328,13 @@ public class MyIDSPlayer implements IPlayer, IAuto {
                             if(s.getPos(i+dir, j+1) == EMPTY) segur = false;
                         }
                     }
-                    if(segur) n += 2;
-                    if(s.getPos(i, j).isQueen() && segur) ++n;
+                    
+                    if(n_fitxes(s, player) < 5) n +=2;
+                    else {
+                        if(segur) n += 4;
+                        //if(segur) n += 2;
+                        if(s.getPos(i, j).isQueen() && segur) ++n;
+                    }
                 }
                 
             }
@@ -316,7 +342,7 @@ public class MyIDSPlayer implements IPlayer, IAuto {
         return n;
     }
 
-    private int nombre_moveable_fitxes (GameStatus s, PlayerType player){ 
+    private static int nombre_moveable_fitxes (GameStatus s, PlayerType player){ 
         int n = 0;
         int c;
         boolean moveable;
@@ -335,7 +361,8 @@ public class MyIDSPlayer implements IPlayer, IAuto {
                         if(c < s.getSize() && s.getPos(i-dir, j+1) == EMPTY) moveable = true; 
                         else if ((c-2) > 0 && s.getPos(i-dir, j-1) == EMPTY) moveable = true;
                     }
-                    if(moveable) n += 3;
+                    //if(moveable) n += 2;
+                    if(moveable) n += 1;
                     if(s.getPos(i, j).isQueen() && moveable) ++n;
                 }
                 
@@ -344,7 +371,7 @@ public class MyIDSPlayer implements IPlayer, IAuto {
         return n;
     }
     
-     private int nombre_promotion_line(GameStatus s, PlayerType player){ 
+     private static int nombre_promotion_line(GameStatus s, PlayerType player){ 
         int n = 0;
         int i = 0;
         if(player == PLAYER2) i = s.getSize()-1;
@@ -354,13 +381,4 @@ public class MyIDSPlayer implements IPlayer, IAuto {
         }
         return n;
     }
-    */
-    
-    
-    
-    
-    
-    
-    
-
 }
