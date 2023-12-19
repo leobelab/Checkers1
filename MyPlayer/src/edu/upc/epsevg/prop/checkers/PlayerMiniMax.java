@@ -18,6 +18,7 @@ import static edu.upc.epsevg.prop.checkers.PlayerType.PLAYER2;
 import edu.upc.epsevg.prop.checkers.SearchType;
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -25,7 +26,7 @@ import java.util.Random;
  * Jugador aleatori
  * @author LBL
  */
-public class MyPlayer implements IPlayer, IAuto {
+public class PlayerMiniMax implements IPlayer, IAuto {
 
     private String name;
     private GameStatus s;
@@ -34,7 +35,7 @@ public class MyPlayer implements IPlayer, IAuto {
     public static PlayerType playeradversari;
     private int nodes_explorats = 0;
 
-    public MyPlayer(String name) {
+    public PlayerMiniMax(String name) {
         this.name = name;
     }
 
@@ -52,13 +53,15 @@ public class MyPlayer implements IPlayer, IAuto {
      */
     @Override
     public PlayerMove move(GameStatus s) {
+        Date start = new Date();
         playerteu = s.getCurrentPlayer();
         playeradversari = PlayerType.opposite(playerteu);
         List<Point> millor_jugada = minMax(s);
         
-        return new PlayerMove( millor_jugada, nodes_explorats, profunditat, SearchType.MINIMAX);         
-        
-       
+        Date end = new Date();
+        long duration = end.getTime() - start.getTime();
+        System.out.println("El moviment ha durat: " + duration + " milisegons en calcular-se!");
+        return new PlayerMove( millor_jugada, nodes_explorats, profunditat, SearchType.MINIMAX);  
         
     }
     
@@ -69,7 +72,7 @@ public class MyPlayer implements IPlayer, IAuto {
      */
     @Override
     public String getName() {
-        return "MyPlayer";
+        return "PlayerMiniMax";
     }
 
     
@@ -81,7 +84,7 @@ public class MyPlayer implements IPlayer, IAuto {
      * @return La millor seqüència de moviments.
      */
     private List<Point> minMax(GameStatus s) {
-        int costActual = -20000;
+        int costActual = -20001;
         List<MoveNode> moves =  s.getMoves();
         List<Point> points = new ArrayList<>();
         int alpha = Integer.MIN_VALUE, beta = Integer.MAX_VALUE;
@@ -274,10 +277,6 @@ public class MyPlayer implements IPlayer, IAuto {
             for(int j = 0; j < s.getSize(); j++){
                 if(s.getPos(i, j).getPlayer() == player) {
                     ++n;
-                    //if(player == PLAYER1 && i > meitat) n += 1;
-                    //else if(player == PLAYER2 && i < meitat) n += 1;    
-                    //int dist_centro = Math.abs(s.getSize()/2 - i) + Math.abs(s.getSize()/2 - j);
-                    //n += (s.getSize() - dist_centro)/2;
                     if(s.getPos(i, j).isQueen()) ++n;
                     if(n_fitxes(s, player) < 6) n += 2;
                 }
@@ -311,12 +310,10 @@ public class MyPlayer implements IPlayer, IAuto {
                             if(s.getPos(i+dir, j+1) == EMPTY) segur = false;
                         }
                     }
-                    
                     if(n_fitxes(s, player) < 6) n +=1;
-                    else {
-                        if(segur) n += 4;
-                        //if(segur) n += 2;
-                        if(s.getPos(i, j).isQueen() && segur) ++n;
+                    else if(segur) {
+                        n += 4;
+                        if(s.getPos(i, j).isQueen()) ++n;
                     }
                 }
                 
@@ -345,8 +342,10 @@ public class MyPlayer implements IPlayer, IAuto {
                         else if ((c-2) > 0 && s.getPos(i-dir, j-1) == EMPTY) moveable = true;
                     }
                     //if(moveable) n += 2;
-                    if(moveable && n_fitxes(s, player) > 6) n += 1;
-                    if(s.getPos(i, j).isQueen() && moveable) ++n;
+                    if(n_fitxes(s, player) > 6) {
+                        if(moveable) n += 1;
+                        if(s.getPos(i, j).isQueen() && moveable) ++n;
+                    }
                 }
                 
             }
