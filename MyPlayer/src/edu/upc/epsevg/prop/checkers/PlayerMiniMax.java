@@ -23,8 +23,12 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Jugador aleatori
- * @author LBL
+ * Aquesta classe representa un jugador que utilitza l'algorisme MiniMax per
+ * prendre decisions en el joc de Checkers. Implementa les interfícies IPlayer i
+ * IAuto.
+ *
+ * @author Leo Benítez Labit
+ * @author Pol Laguna Soto
  */
 public class PlayerMiniMax implements IPlayer, IAuto {
 
@@ -35,22 +39,31 @@ public class PlayerMiniMax implements IPlayer, IAuto {
     public static PlayerType playeradversari;
     private int nodes_explorats = 0;
 
+    /**
+    * Nom del jugador.
+    * 
+    * @param name El nom del jugador Minimax.
+    */
     public PlayerMiniMax(String name) {
         this.name = name;
     }
 
+    /**
+    * Ens avisa que hem de parar la cerca en curs perquè s'ha exhaurit el temps
+    * de joc.
+    */
     @Override
     public void timeout() {
         // Nothing to do! I'm so fast, I never timeout 8-)
     }
 
     /**
-     * Decideix el moviment del jugador donat un tauler i un color de peça que
-     * ha de posar.
-     *
-     * @param s Tauler i estat actual de joc.
-     * @return el moviment que fa el jugador.
-     */
+    * Decideix el moviment a executar del jugador donat un tauler.
+    * 
+    *
+    * @param s Tauler i estat actual de joc.
+    * @return el moviment que fa el jugador.
+    */
     @Override
     public PlayerMove move(GameStatus s) {
         Date start = new Date();
@@ -67,9 +80,10 @@ public class PlayerMiniMax implements IPlayer, IAuto {
     
 
     /**
-     * Ens avisa que hem de parar la cerca en curs perquè s'ha exhaurit el temps
-     * de joc.
-     */
+    * Funció simple per aconseguir el nom del jugador.
+    * 
+    * @return el nom del jugador.
+    */
     @Override
     public String getName() {
         return "PlayerMiniMax";
@@ -77,12 +91,12 @@ public class PlayerMiniMax implements IPlayer, IAuto {
 
     
     /**
-     * Implementa l'algorisme MiniMax per trobar el millor moviment en el tauler
-     * actual.
-     *
-     * @param s El tauler actual del joc.
-     * @return La millor seqüència de moviments.
-     */
+    * Implementa l'algorisme MiniMax per trobar el millor moviment en el tauler
+    * actual.
+    *
+    * @param s Tauler i estat actual de joc.
+    * @return La millor seqüència de moviments.
+    */
     private List<Point> minMax(GameStatus s) {
         int costActual = -20001;
         List<MoveNode> moves =  s.getMoves();
@@ -106,14 +120,14 @@ public class PlayerMiniMax implements IPlayer, IAuto {
     }
     
     /**
-     * Calcula el valor mínim en un estat del joc utilitzant recursió.
-     *
-     * @param s El tauler actual del joc.
-     * @param depth La profunditat restant per explorar.
-     * @param alpha Límit inferior actual per a la poda alfa-beta.
-     * @param beta Límit superior actual per a la poda alfa-beta.
-     * @return El valor mínim calculat per a l'estat actual.
-     */
+    * Calcula el valor mínim en un estat del joc amb la recursivitat.
+    *
+    * @param s Tauler i estat actual de joc.
+    * @param depth La profunditat que ens queda per explorar.
+    * @param alpha Límit inferior de la poda alfa-beta.
+    * @param beta Límit superior de la poda alfa-beta.
+    * @return El valor mínim en l'estat actual joc.
+    */
     private int minValor(GameStatus s, int depth, int alpha, int beta) {
         int millorMoviment = 20000;
 
@@ -133,40 +147,34 @@ public class PlayerMiniMax implements IPlayer, IAuto {
         List<MoveNode> moves =  s.getMoves();
         List<Point> points = new ArrayList<>();
         List<List<Point>> lol = calmov(moves);        
-        // Itera a través de les columnes del tauler per a les possibles moviments.
+        // Itera a partir de les possibles jugades que es poden realitzar al tauler actual.
         for (int i = 0; i < lol.size() && !aturat; i++) {
             GameStatus aux = new GameStatus(s);
-
-            // Verifica si el moviment és possible.
+            List<Point> intent = lol.get(i);
+            aux.movePiece(intent);
             
-                List<Point> intent = lol.get(i);
-                aux.movePiece(intent);
-                int fhMax = maxValor(aux, depth - 1, alpha, beta);
-
-                // Actualitza el millor moviment amb el valor mínim.
-                millorMoviment = Math.min(millorMoviment, fhMax);
-
-                // Realitza la poda alfa-beta.
-                beta = Math.min(millorMoviment, beta);
-
-                // Verifica si es pot parar la cerca actual amb la poda alfa-beta.
-                if (alpha >= beta) {
-                    aturat = true;
-                }
+            int fhMax = maxValor(aux, depth - 1, alpha, beta);
+            // Actualitza el millor moviment amb el valor mínim.
+            millorMoviment = Math.min(millorMoviment, fhMax);
+            // Realitza la poda alfa-beta.
+            beta = Math.min(millorMoviment, beta);
+            // Verifica si es pot parar la cerca actual amb la poda alfa-beta.
+            if (alpha >= beta) {
+                aturat = true;
+            }
         }
-
         return millorMoviment;
     }
     
-        /**
-     * Calcula el valor màxim en un estat del joc utilitzant recursió.
-     *
-     * @param s El tauler actual del joc.
-     * @param depth La profunditat restant per explorar.
-     * @param alpha Límit inferior actual per a la poda alfa-beta.
-     * @param beta Límit superior actual per a la poda alfa-beta.
-     * @return El valor màxim calculat per a l'estat actual.
-     */
+    /**
+    * Calcula el valor màxim en un estat del joc amb la recursivitat.
+    * 
+    * @param s Tauler i estat actual de joc.
+    * @param depth La profunditat que ens queda per explorar.
+    * @param alpha Límit inferior de la poda alfa-beta.
+    * @param beta Límit superior de la poda alfa-beta.
+    * @return El valor màxim en l'estat actual joc.
+    */
     private int maxValor(GameStatus s, int depth, int alpha, int beta) {
         int valorHeuristic = -20000;
 
@@ -186,29 +194,32 @@ public class PlayerMiniMax implements IPlayer, IAuto {
         List<MoveNode> moves =  s.getMoves();
         List<Point> points = new ArrayList<>();
         List<List<Point>> lol = calmov(moves);
-        // Itera a través de les columnes del tauler per a les possibles moviments.
+        // Itera a partir de les possibles jugades que es poden realitzar al tauler actual.
         for (int i = 0; i < lol.size() && !aturat; i++) {
             GameStatus aux = new GameStatus(s);
-
             List<Point> intent = lol.get(i);
             aux.movePiece(intent);
+            
             int fhMin = minValor(aux, depth - 1, alpha, beta);
-
             // Actualitza el valor heurístic amb el valor màxim.
             valorHeuristic = Math.max(valorHeuristic, fhMin);
-
             // Realitza la poda alfa-beta si està habilitada.
-
             alpha = Math.max(valorHeuristic, alpha);
             // Verifica si es pot parar la cerca actual amb la poda alfa-beta.
             if (alpha >= beta) {
                 aturat = true;
             }
         }
-
         return valorHeuristic;
     }
     
+    /**
+    * Converteix la llista de nodes amb els moviments en una llista de llista de
+    * punts amb les jugades.
+    * 
+    * @param moves Llista amb tots els possibles moviments d'un jugador.
+    * @return Lista de llistes de punts que guarden totes les jugades que pot fer.
+    */
     private List<List<Point>> calmov( List<MoveNode> moves){
         
         List<List<Point>> lol = new ArrayList<List<Point>>();
@@ -222,16 +233,20 @@ public class PlayerMiniMax implements IPlayer, IAuto {
             lol.addAll(lol_aux);
 
         }
-        
         return lol;
-       
     }
     
+    /**
+    * Converteix la llista de nodes amb els moviments en una llista de llista de
+    * punts amb les jugades.
+    * 
+    * @param node MoveNode on tenim els possibles moviments d'una peça.
+    * @param lp Llista de punts on guardarem el camí que es va formant en una tirada.
+    * @param lol_aux Llista de llista de punts on guardarem totes les lp quan estiguin
+    * formades.
+    */
     private void ds( MoveNode node, List<Point> lp, List<List<Point>> lol_aux){
         
-        //List<List<Point>> lol = new List<List<Point>>();
-        
-        //List<Point> lp = new List<Point>();
         lp.add(node.getPoint());
         if(!node.getChildren().isEmpty()) {
             ds(node.getChildren().get(0), new ArrayList<>(lp), lol_aux);
@@ -240,77 +255,115 @@ public class PlayerMiniMax implements IPlayer, IAuto {
             }
         }
         else {
-            lol_aux.add(lp); //podemos lol_aux.add(new ArrayList<>(lp))
+            lol_aux.add(lp);
         }
     } 
     
+    /**
+    * Calcula el nombre de fitxes d'un jugador.
+    * 
+    * @param s Tauler i estat actual de joc.
+    * @param player Jugador sobre el qual realitzarem els calculs.
+    * @return El nombre de fitxes del jugador player.
+    */
     private static int n_fitxes (GameStatus s, PlayerType player){ 
+        
         int n_fitxes = 0;
         for(int i = 0; i < s.getSize(); i++) {
             for(int j = 0; j < s.getSize(); j++){
                 if(s.getPos(i, j).getPlayer() == player) {
                     ++n_fitxes;
                 }
-                
             }
         }
         return n_fitxes;
     }
     
+    /**
+    * Calcula el valor heurístic basat en diferents paràmetres.
+    * 
+    * @param s Tauler i estat actual de joc.
+    * @return El valor heurístic segons el GameStatus donat.
+    */
     public int heuristica (GameStatus s){
         
         int h=0;
         nodes_explorats++;
         int diferencia_fitxes = nombre_fitxes(s, playerteu) - nombre_fitxes(s, playeradversari);
         int diferencia_peons_segurs = nombre_fitxes_segures(s, playerteu) - nombre_fitxes_segures(s, playeradversari);
-        int diferencia_moveable_peons = nombre_moveable_fitxes(s, playerteu) - nombre_moveable_fitxes(s, playeradversari);
-        int diferencia_promotion_line = nombre_promotion_line(s, playerteu) - nombre_promotion_line(s, playeradversari);
+        int diferencia_moveable_fitxes = nombre_moveable_fitxes(s, playerteu) - nombre_moveable_fitxes(s, playeradversari);
+        //int diferencia_promotion_line = nombre_promotion_line(s, playerteu) - nombre_promotion_line(s, playeradversari);
         
-        h += diferencia_fitxes + diferencia_peons_segurs + diferencia_moveable_peons;
+        h += diferencia_fitxes + diferencia_peons_segurs + diferencia_moveable_fitxes;
         return h;
     }
     
+    /**
+    * Calcula part del valor heurístic basat en el nombre de peons i reines d'un jugador, 
+    * afegint valor a aquests valors si tenim menys de 6 fites totals.
+    * 
+    * @param s Tauler i estat actual de joc.
+    * @param player Jugador sobre el qual realitzarem els calculs.
+    * @return El valor heurístic sobre el nombre de fixtes del jugador player.
+    */
     private static int nombre_fitxes (GameStatus s, PlayerType player){ 
         int n = 0;
         int meitat = s.getSize()/2;
+        boolean menysDeSis = false;
+        if(n_fitxes(s, player) < 6) menysDeSis = true;
         for(int i = 0; i < s.getSize(); i++) {
             for(int j = 0; j < s.getSize(); j++){
                 if(s.getPos(i, j).getPlayer() == player) {
                     ++n;
                     if(s.getPos(i, j).isQueen()) ++n;
-                    if(n_fitxes(s, player) < 6) n += 2;
+                    if(menysDeSis) {
+                        n += 2;
+                        if(s.getPos(i, j).isQueen()) n += 2;
+                    }
                 }
             }
         }
         return n;
     }
     
+    /**
+    * Calcula part del valor heurístic basat en el nombre de peons i reines segures 
+    * d'un jugador (amb aixó ens referim a que no tingui cap fitxa oposada que li pugui 
+    * matar en la següent jugada), afegint valor a aquests valors si tenim menys 
+    * de 6 fitxes totals.
+    * 
+    * @param s Tauler i estat actual de joc.
+    * @param player Jugador sobre el qual realitzarem els calculs.
+    * @return El valor heurístic sobre el nombre de fixtes segures del jugador player.
+    */
     private static int nombre_fitxes_segures (GameStatus s, PlayerType player){ 
         int n = 0;
         int c;
         boolean segur;
+        boolean menysDeSis = false;
+        if(n_fitxes(s, player) < 6) menysDeSis = true;
         PlayerType adversari = PlayerType.opposite(player);
         for(int i = 0; i < s.getSize(); i++) {
             for(int j = 0; j < s.getSize(); j++){
                 if(s.getPos(i, j).getPlayer() == player) {
                     int dir = s.getYDirection(player);
-                    c = j+1;
+                    c = i+1;
                     segur = true;
-                    if(c < s.getSize() && (c-2) > 0 && (i-dir) >= 0 && (i-dir) < s.getSize() && (i+dir) >=0 && (i+dir) < s.getSize()) {
-                        if(s.getPos(i+dir, j+1).getPlayer() == adversari ) {
-                            if(s.getPos(i-dir, j-1) == EMPTY) segur = false;
+                    if(c < s.getSize() && (c-2) > 0 && (j-dir) >= 0 && (j-dir) < s.getSize() && (j+dir) >=0 && (j+dir) < s.getSize()) {
+                        if(s.getPos(i+1, j+dir).getPlayer() == adversari ) {
+                                if(s.getPos(i-1, j-dir) == EMPTY) segur = false;
                         }
-                        if(segur && s.getPos(i+dir, j-1).getPlayer() == adversari) {
-                            if(s.getPos(i-dir, j+1) == EMPTY) segur = false;
+                        if(segur && s.getPos(i-1, j+dir).getPlayer() == adversari) {
+                            if(s.getPos(i+1, j-dir) == EMPTY) segur = false;
                         }
-                        if(segur && s.getPos(i-dir, j+1).getPlayer() == adversari && s.getPos(i-dir,j+1).isQueen()){
-                            if(s.getPos(i+dir, j-1) == EMPTY) segur = false;
+                        if(segur && s.getPos(i+1, j-dir).getPlayer() == adversari && s.getPos(i-dir,j+1).isQueen()){
+                                if(s.getPos(i-1, j+dir) == EMPTY) segur = false;
                         }
-                        if(segur && s.getPos(i-dir, j-1).getPlayer() == adversari && s.getPos(i-dir,j-1).isQueen()){
-                            if(s.getPos(i+dir, j+1) == EMPTY) segur = false;
+                        if(segur && s.getPos(i-1, j-dir).getPlayer() == adversari && s.getPos(i-dir,j-1).isQueen()){
+                            if(s.getPos(i+1, j+dir) == EMPTY) segur = false;
                         }
                     }
-                    if(n_fitxes(s, player) < 6) n +=1;
+                    if(menysDeSis) n += 3;
                     else if(segur) {
                         n += 4;
                         if(s.getPos(i, j).isQueen()) ++n;
@@ -322,30 +375,40 @@ public class PlayerMiniMax implements IPlayer, IAuto {
         return n;
     }
 
+    /**
+    * Calcula part del valor heurístic basat en el nombre de peons i reines que es
+    * poden moure, a no ser que tinguem menys de sis fitxes.
+    * 
+    * @param s Tauler i estat actual de joc.
+    * @param player Jugador sobre el qual realitzarem els calculs.
+    * @return El valor heurístic sobre el nombre de fixtes segures del jugador player.
+    */
     private static int nombre_moveable_fitxes (GameStatus s, PlayerType player){ 
         int n = 0;
         int c;
         boolean moveable;
+        boolean menysDeSis = false;
+        if(n_fitxes(s, player) < 6) menysDeSis = true;
         PlayerType adversari = PlayerType.opposite(player);
         for(int i = 0; i < s.getSize(); i++) {
             for(int j = 0; j < s.getSize(); j++){
                 if(s.getPos(i, j).getPlayer() == player) {
                     int dir = s.getYDirection(player);
-                    c = j+1;
+                    c = i+1;
                     moveable = false;
-                    if((i+dir) >=0 && (i+dir) < s.getSize()) {
-                        if(c < s.getSize() && s.getPos(i+dir, j+1) == EMPTY) moveable = true; 
-                        else if ((c-2) > 0 && s.getPos(i+dir, j-1) == EMPTY) moveable = true;
+                    if((j+dir) >=0 && (j+dir) < s.getSize()) {
+                        if(c < s.getSize() && s.getPos(i+1, j+dir) == EMPTY) moveable = true; 
+                        else if ((c-2) > 0 && s.getPos(i-1, j+dir) == EMPTY) moveable = true;
                     }
-                    if(!moveable && s.getPos(i, j).isQueen() && (i-dir) >= 0 && (i-dir) < s.getSize()) {
-                        if(c < s.getSize() && s.getPos(i-dir, j+1) == EMPTY) moveable = true; 
-                        else if ((c-2) > 0 && s.getPos(i-dir, j-1) == EMPTY) moveable = true;
+                    if(!moveable && s.getPos(i, j).isQueen() && (j-dir) >= 0 && (j-dir) < s.getSize()) {
+                        if(c < s.getSize() && s.getPos(i+1, j-dir) == EMPTY) moveable = true; 
+                        else if ((c-2) > 0 && s.getPos(i-1, j-dir) == EMPTY) moveable = true;
                     }
-                    //if(moveable) n += 2;
-                    if(n_fitxes(s, player) > 6) {
+                    if(!menysDeSis) {
                         if(moveable) n += 1;
                         if(s.getPos(i, j).isQueen() && moveable) ++n;
                     }
+
                 }
                 
             }
@@ -353,7 +416,7 @@ public class PlayerMiniMax implements IPlayer, IAuto {
         return n;
     }
     
-     private static int nombre_promotion_line(GameStatus s, PlayerType player){ 
+     /*private static int nombre_promotion_line(GameStatus s, PlayerType player){ 
         int n = 0;
         int i = 0;
         if(player == PLAYER2) i = s.getSize()-1;
@@ -362,6 +425,6 @@ public class PlayerMiniMax implements IPlayer, IAuto {
                 
         }
         return n;
-    }    
+    }*/
 
 }
